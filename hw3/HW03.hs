@@ -52,7 +52,7 @@ evalE state (Op expr1 bop expr2) = case bop of
   Times  -> (evalE state expr1) * (evalE state expr2)
   Divide -> (evalE state expr1) `div` (evalE state expr2)
   Gt     -> if (evalE state expr1) > (evalE state expr2) then 1 else 0
-  Ge     -> if (evalE state expr1) >= (evalE state expr2) then 1 else 0    
+  Ge     -> if (evalE state expr1) >= (evalE state expr2) then 1 else 0 
   Lt     -> if (evalE state expr1) < (evalE state expr2) then 1 else 0  
   Le     -> if (evalE state expr1) <= (evalE state expr2) then 1 else 0
   Eql    -> if (evalE state expr1) == (evalE state expr2) then 1 else 0
@@ -68,22 +68,36 @@ data DietStatement = DAssign String Expression
 
 desugar :: Statement -> DietStatement
 desugar (Assign name expr) = DAssign name expr
-  Assign   String     Expression
-  | Incr     String
-  | If       Expression Statement  Statement
-  | While    Expression Statement       
-  | For      Statement  Expression Statement Statement
-  | Sequence Statement  Statement        
-  | Skip
-  
+desugar (Incr name) = DAssign name (Op (Var name) Plus (Val 1))
+desugar (If expr stmt1 stmt2) = DIf expr (desugar stmt1) (desugar stmt2)
+desugar (While expr stmt) = DWhile expr (desugar stmt)
+desugar (For prestmt cond poststmt body) =
+  (DSequence (desugar prestmt) (DWhile cond (DSequence (desugar body) (desugar poststmt))))
+desugar (Sequence stmt1 stmt2) = DSequence (desugar stmt1) (desugar stmt2)
+desugar Skip = DSkip  
 
 -- Exercise 4 -----------------------------------------
 
 evalSimple :: State -> DietStatement -> State
-evalSimple = undefined
+evalSimple initSt (DAssign name expr) = extend initSt name (evalE initSt expr)
+evalSimple iS (DIf expr ifbody elsebody) =
+  if 0 == (evalE iS expr)
+   then (evalSimple iS elsebody)
+   else (evalSimple iS ifbody)
+
+evalSimple iS (DWhile expr stmt) =
+  if 0 == (evalE iS expr)
+  then iS
+  else evalSimple (evalSimple iS stmt) (DWhile expr stmt)
+
+evalSimple iS (DSequence s1 s2) =
+  evalSimple (evalSimple iS s1) s2
+
+evalSimple iS DSkip = iS
+
 
 run :: State -> Statement -> State
-run = undefined
+run iS stmt = evalSimple iS (desugar stmt)
 
 -- Programs -------------------------------------------
 
