@@ -21,29 +21,11 @@ getSecret path1 path2 = do
   f2 <- BS.readFile path2
   return $ BS.filter (\x ->  x /= 0) (BS.pack $ map (\x -> xor (fst x) (snd x)) (BS.zip f1 f2)) 
 
-
-{-
-getWords :: IO [ByteString]
-getWords = BS.split 32 <$> BS.getLine
--}
--- Exercise 2 -----------------------------------------
-{-
-decryptHelper :: ByteString -> Int-> ByteString -> ByteString
-decryptHelper key offset BS.empty = BS.empty
-decryptHelper key offset target
-  | offset == BS.length key = BS.append
-    (BS.singleton (xor (BS.head key) (BS.head target)))
-    (decryptHelper key 1 (BS.tail target))
-  | otherwise = 
--}
-
 decryptWithKey :: ByteString -> FilePath -> IO ()
 decryptWithKey key path = do
   contents <- BS.readFile (path ++ ".enc")
   BS.writeFile path $ snd (BS.mapAccumL (\x y -> (if (x+1) == (BS.length key) then 0 else (x+1), xor (BS.index key x) y)) 0 contents)
   
-  
-
 -- Exercise 3 -----------------------------------------
 
 parseFile :: FromJSON a => FilePath -> IO (Maybe a)
@@ -54,7 +36,8 @@ parseFile path = do
 -- Exercise 4 -----------------------------------------
 
 getBadTs :: FilePath -> FilePath -> IO (Maybe [Transaction])
-getBadTs victimListPath transactionsPath = undefined
+getBadTs victimListPath transactionsPath = do
+  victims <- parseFile 
 
 -- Exercise 5 -----------------------------------------
 
