@@ -37,7 +37,12 @@ parseFile path = do
 
 getBadTs :: FilePath -> FilePath -> IO (Maybe [Transaction])
 getBadTs victimListPath transactionsPath = do
-  
+  victims <- (case (parseFile victimListPath) of
+                Just (x:xs) -> (x:xs)
+                Nothing -> [])
+  return $ filter (\x -> elem (tid x) victims) (case (parseFile transactionsPath) of
+                                                  Just (x:xs) -> (x:xs)
+                                                  Nothing -> [])
 
 -- Exercise 5 -----------------------------------------
 
