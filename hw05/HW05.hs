@@ -37,32 +37,44 @@ parseFile path = do
 
 getBadTs :: FilePath -> FilePath -> IO (Maybe [Transaction])
 getBadTs victimListPath transactionsPath = do
-  victims <- (case (parseFile victimListPath) of
-                Just (x:xs) -> (x:xs)
-                Nothing -> [])
-  return $ filter (\x -> elem (tid x) victims) (case (parseFile transactionsPath) of
-                                                  Just (x:xs) -> (x:xs)
-                                                  Nothing -> [])
+  victims <- parseFile victimListPath
+  txs <- parseFile transactionsPath
+  let vicarray = case victims of
+        Just (x:xs) -> (x:xs)
+        Nothing -> []
+
+  let txsarray = case txs of
+        Just (x:xs) -> (x:xs)
+        Nothing -> []
+
+  let result = case (filter (\x -> elem (tid x) vicarray) txsarray) of
+        [] -> Nothing
+        (x:xs) -> Just (x:xs)
+  return result
+  
 
 -- Exercise 5 -----------------------------------------
 
 getFlow :: [Transaction] -> Map String Integer
-getFlow = undefined
+getFlow [] = Map.empty
+getFlow (x:xs) = Map.insertWith (+) (to x) (amount x) mp where
+  mp = Map.insertWith (+) (from x) (negate $ amount x) (getFlow xs)
 
 -- Exercise 6 -----------------------------------------
 
 getCriminal :: Map String Integer -> String
-getCriminal = undefined
+getCriminal mp = fst $ Map.foldlWithKey' (\x key val -> if val > (snd x) then (key,val) else x) ("", -1) mp 
 
 -- Exercise 7 -----------------------------------------
 
 undoTs :: Map String Integer -> [TId] -> [Transaction]
-undoTs = undefined
+undoTs = []
 
 -- Exercise 8 -----------------------------------------
 
 writeJSON :: ToJSON a => FilePath -> a -> IO ()
-writeJSON = undefined
+writeJSON path txs = do
+  writeFile path (encode txs)
 
 -- Exercise 9 -----------------------------------------
 
