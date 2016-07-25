@@ -64,7 +64,7 @@ shuffle v = shuffleHelper V.empty v
 -- Exercise 6 -----------------------------------------
 
 partitionAt :: Ord a => Vector a -> Int -> (Vector a, a, Vector a)
-partitionAt v idx = undefined
+partitionAt v idx = (V.filter (\x -> x < (v ! idx)) v, (v ! idx), V.filter (\x -> x >= (v ! idx)) v)
 
 -- Exercise 7 -----------------------------------------
 
@@ -75,12 +75,23 @@ quicksort (x:xs) = quicksort [ y | y <- xs, y < x ]
                    <> (x : quicksort [ y | y <- xs, y >= x ])
 
 qsort :: Ord a => Vector a -> Vector a
-qsort = undefined
+qsort v
+  | V.null v = V.empty
+  | otherwise = qsort [ y | y <- (V.tail v), y < x ]
+    <> (V.cons (V.head v) $ qsort [ y | y <- (V.tail v), y >= x]) 
+  where x = V.head v
 
 -- Exercise 8 -----------------------------------------
 
 qsortR :: Ord a => Vector a -> Rnd (Vector a)
-qsortR = undefined
+qsortR v
+  | V.null v = return V.empty
+  | otherwise = do
+      idx <- getRandomR (0, (V.length v)-1)
+      let (lft, pivot, rgt) = partitionAt v idx
+      lftSorted <- qsortR lft
+      rgtSorted <- qsortR rgt
+      return (lftSorted <> (V.cons pivot rgtSorted))
 
 -- Exercise 9 -----------------------------------------
 
