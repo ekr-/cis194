@@ -102,10 +102,10 @@ qsortR v
 select :: Ord a => Int -> Vector a -> Rnd (Maybe a)
 select rank v
   | V.null v = return Nothing
-  | otherwise = do
-      pivot <- getRandomR (0, (V.length v)-1)
-      let (L, P, R) = partitionAt v pivot
-      return (if rank < (V.length L) 
+  | otherwise = getRandomR (0, (V.length v)-1) >>= \pivot ->
+      let (l, p, r) = partitionAt v pivot in
+        if rank < V.length l then select rank l else
+          if rank == pivot then return (Just p) else select (rank-(V.length l)-1) r 
 
 -- Exercise 10 ----------------------------------------
 
