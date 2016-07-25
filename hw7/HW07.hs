@@ -64,7 +64,10 @@ shuffle v = shuffleHelper V.empty v
 -- Exercise 6 -----------------------------------------
 
 partitionAt :: Ord a => Vector a -> Int -> (Vector a, a, Vector a)
-partitionAt v idx = (V.filter (\x -> x < (v ! idx)) v, (v ! idx), V.filter (\x -> x >= (v ! idx)) v)
+partitionAt v idx = (
+  V.filter (\x -> x < (v ! idx)) ((V.take idx v) <> (V.drop (idx+1) v)),
+  (v ! idx),
+  V.filter (\x -> x >= (v ! idx)) ((V.take idx v) <> (V.drop (idx+1) v)))
 
 -- Exercise 7 -----------------------------------------
 
