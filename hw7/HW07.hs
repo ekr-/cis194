@@ -110,20 +110,25 @@ select rank v
 -- Exercise 10 ----------------------------------------
 
 allCards :: Deck
-allCards = undefined
+allCards = [Card x y | x <- labels, y <- suits]
 
 newDeck :: Rnd Deck
-newDeck =  undefined
+newDeck =  shuffle allCards
 
 -- Exercise 11 ----------------------------------------
 
 nextCard :: Deck -> Maybe (Card, Deck)
-nextCard = undefined
+nextCard deck
+  | V.null deck = Nothing
+  | otherwise = Just (V.head deck, V.tail deck)
 
 -- Exercise 12 ----------------------------------------
 
 getCards :: Int -> Deck -> Maybe ([Card], Deck)
-getCards = undefined
+getCards n deck
+  | n == 0 = Just ([], deck)
+  | n > V.length deck = Nothing
+  | otherwise = nextCard deck >>= \x -> getCards (n-1) (snd x) >>= \y -> return ((fst x) : fst y, snd y)
 
 -- Exercise 13 ----------------------------------------
 
