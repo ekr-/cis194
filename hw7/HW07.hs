@@ -100,7 +100,12 @@ qsortR v
 
 -- Selection
 select :: Ord a => Int -> Vector a -> Rnd (Maybe a)
-select = undefined
+select rank v
+  | V.null v = return Nothing
+  | otherwise = do
+      pivot <- getRandomR (0, (V.length v)-1)
+      let (L, P, R) = partitionAt v pivot
+      return (if rank < (V.length L) 
 
 -- Exercise 10 ----------------------------------------
 
